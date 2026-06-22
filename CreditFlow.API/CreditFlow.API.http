@@ -1,0 +1,6 @@
+@CreditFlow.API_HostAddress = http://localhost:5059
+
+GET {{CreditFlow.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

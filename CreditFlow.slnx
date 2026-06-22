@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/Creditflow.API/">
+    <Project Path="Creditflow.API/CreditFlow.API.csproj" />
+  </Folder>
+  <Project Path="CreditFlow.Application/CreditFlow.Application.csproj" />
+  <Project Path="CreditFlow.Domain/CreditFlow.Domain.csproj" />
+  <Project Path="CreditFlow.Infrastructure/CreditFlow.Infrastructure.csproj" />
+</Solution>
