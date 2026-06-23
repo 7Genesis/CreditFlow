@@ -20,7 +20,13 @@ builder.Services.AddScoped<IPropostaCreditoRepository, PropostaCreditoRepository
 //4.Registrar os Casos de Uso da camada de aplicação
 builder.Services.AddScoped<CriarPropostaUseCase>();
 
+//5. Adiciona o suporte a Controllers no contêiner
+builder.Services.AddControllers();
+
 var app = builder.Build();
+
+//6. Mapeia os endpoints dos Controllers para as rotas da API
+app.MapControllers();
 
 // Endpoint de teste rápido para verificar se a API está funcionando
 app.MapGet("/", () => "API de Propostas de Crédito está funcionando!");
