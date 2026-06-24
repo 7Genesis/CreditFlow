@@ -8,11 +8,15 @@ namespace CreditFlow.API.Controllers;
 [Route("api/[controller]")]
 public class PropostasController : ControllerBase
 {
-    private readonly CriarPropostaUseCase _useCase;
+    private readonly CriarPropostaUseCase _criarUseCase;
+    private readonly ObterPropostaUseCase _obterUseCase;
 
-    public PropostasController(CriarPropostaUseCase UseCase)
+    public PropostasController(
+        CriarPropostaUseCase criarUseCase, 
+        ObterPropostaUseCase obterUseCase)
     {
-        _useCase = UseCase;
+        _criarUseCase = criarUseCase;
+        _obterUseCase = obterUseCase;
     }
 
     [HttpPost]
@@ -20,17 +24,23 @@ public class PropostasController : ControllerBase
     {
         try
         {
-            //Executa a regra de negócio do Uso Case
-            var idGerado = await _useCase.ExecuteAsync(input);
-
-            //Retorna o status HTTP 201 (Created) e o ID gerado no banco
-            return StatusCode(201, new { message = "Proposta criada com sucesso", id = idGerado});
+            var idGerado = await _criarUseCase.ExecuteAsync(input);
+            return StatusCode(201, new { message = "Proposta criada com sucesso", id = idGerado });
         }
-        catch (System.Exception ex)
+        catch (ArgumentException ex)
         {
-                //Se cair na validação de Domínio(ex: CPF nulo), retornar 400 (Bad Request)
-                return BadRequest(new{ erro = ex.Message});
-            }
+            return BadRequest(new { erro = ex.Message });
         }
     }
 
+    [HttpGet("{id:guid}")]
+    public async Task<IActionResult> ObterPorId(Guid id)
+    {
+        var proposta = await _obterUseCase.ExecuteAsync(id);
+
+        if (proposta == null)
+            return NotFound(new { message = "Proposta não encontrada." });
+
+        return Ok(proposta);
+    }
+}

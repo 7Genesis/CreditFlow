@@ -19,6 +19,7 @@ builder.Services.AddScoped<IPropostaCreditoRepository, PropostaCreditoRepository
 
 //4.Registrar os Casos de Uso da camada de aplicação
 builder.Services.AddScoped<CriarPropostaUseCase>();
+builder.Services.AddScoped<ObterPropostaUseCase>();
 
 //5. Adiciona o suporte a Controllers no contêiner
 builder.Services.AddControllers();
