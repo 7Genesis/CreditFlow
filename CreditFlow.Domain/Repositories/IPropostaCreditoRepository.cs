@@ -7,4 +7,7 @@ public interface IPropostaCreditoRepository
     Task AddAsync(PropostaCredito proposta);
     Task<PropostaCredito?> GetByIdAsync(Guid id);
     Task UpdateAsync(PropostaCredito proposta);
+    
+    // NOVO: Contrato para buscar todas as propostas
+    Task<IEnumerable<PropostaCredito>> GetAllAsync();
 }

@@ -30,4 +30,13 @@ public class PropostaCreditoRepository : IPropostaCreditoRepository
         _context.Propostas.Update(proposta);
         await _context.SaveChangesAsync();
     }
+
+    // NOVO: Implementação da listagem
+    public async Task<IEnumerable<PropostaCredito>> GetAllAsync()
+    {
+        return await _context.Propostas
+            .AsNoTracking() // Desliga o rastreamento de memória para máxima velocidade de leitura
+            .OrderByDescending(p => p.DataCriacao) // Ordena da mais nova para a mais antiga
+            .ToListAsync();
+    }
 }

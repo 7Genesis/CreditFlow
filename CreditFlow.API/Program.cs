@@ -21,6 +21,7 @@ builder.Services.AddScoped<IPropostaCreditoRepository, PropostaCreditoRepository
 builder.Services.AddScoped<AtualizarStatusPropostaUseCase>();
 builder.Services.AddScoped<CriarPropostaUseCase>();
 builder.Services.AddScoped<ObterPropostaUseCase>();
+builder.Services.AddScoped<ListarPropostasUseCase>();
 
 
 //5. Adiciona o suporte a Controllers no contêiner

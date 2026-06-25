@@ -11,15 +11,25 @@ public class PropostasController : ControllerBase
     private readonly CriarPropostaUseCase _criarUseCase;
     private readonly ObterPropostaUseCase _obterUseCase;
     private readonly AtualizarStatusPropostaUseCase _atualizarStatusUseCase;
+    private readonly ListarPropostasUseCase _listarUseCase;
 
     public PropostasController(
         CriarPropostaUseCase criarUseCase,
         ObterPropostaUseCase obterUseCase,
-        AtualizarStatusPropostaUseCase atualizarStatusUseCase)
+        AtualizarStatusPropostaUseCase atualizarStatusUseCase,
+        ListarPropostasUseCase listarUseCase)
     {
         _criarUseCase = criarUseCase;
         _obterUseCase = obterUseCase;
         _atualizarStatusUseCase = atualizarStatusUseCase;
+        _listarUseCase = listarUseCase;
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> ListarTodas()
+    {
+        var propostas = await _listarUseCase.ExecuteAsync();
+        return Ok(propostas);
     }
 
     [HttpPost]
