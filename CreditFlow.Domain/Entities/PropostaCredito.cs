@@ -5,45 +5,40 @@ namespace CreditFlow.Domain.Entities;
 public class PropostaCredito
 {
     public Guid Id { get; private set; }
-    public string CpfCliente { get; private set; } = string.Empty;
+    public string CpfCliente { get; private set; }
     public decimal ValorSolicitado { get; private set; }
     public int QuantidadeParcelas { get; private set; }
     public StatusProposta Status { get; private set; }
     public DateTime DataCriacao { get; private set; }
 
-    protected PropostaCredito() { }
-
+    // Construtor que você já criou anteriormente
     public PropostaCredito(string cpfCliente, decimal valorSolicitado, int quantidadeParcelas)
     {
-        if(string.IsNullOrWhiteSpace(cpfCliente))
-            throw new ArgumentException("CPF do cliente é obrigatório.");
-
-        if(valorSolicitado <= 0)
-            throw new ArgumentException("Valor solicitado deve ser maior que zero.");
-
-        if(quantidadeParcelas <= 0)
-            throw new ArgumentException("Quantidade de parcelas deve ser maior que zero.");
-
+        // ... (mantenha suas validações de CPF e valor aqui) ...
+        
         Id = Guid.NewGuid();
         CpfCliente = cpfCliente;
         ValorSolicitado = valorSolicitado;
         QuantidadeParcelas = quantidadeParcelas;
-        Status = StatusProposta.EmAnalise;
+        Status = StatusProposta.EmAnalise; // Status inicial padrão
         DataCriacao = DateTime.UtcNow;
     }
 
-public void Aprovar()
+    
+    public void Aprovar()
     {
         if (Status != StatusProposta.EmAnalise)
-            throw new InvalidOperationException("Apenas propostas em análise podem ser aprovadas.");
-
+            throw new ArgumentException("Apenas propostas em análise podem ser aprovadas.");
+        
         Status = StatusProposta.Aprovada;
     }
-public void Rejeitar()
+
+    
+    public void Recusar()
     {
         if (Status != StatusProposta.EmAnalise)
-            throw new InvalidOperationException("Apenas propostas em análise podem ser recusadas.");
-
+            throw new ArgumentException("Apenas propostas em análise podem ser recusadas.");
+        
         Status = StatusProposta.Rejeitada;
     }
 }

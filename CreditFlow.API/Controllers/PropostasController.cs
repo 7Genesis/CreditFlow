@@ -10,13 +10,16 @@ public class PropostasController : ControllerBase
 {
     private readonly CriarPropostaUseCase _criarUseCase;
     private readonly ObterPropostaUseCase _obterUseCase;
+    private readonly AtualizarStatusPropostaUseCase _atualizarStatusUseCase;
 
     public PropostasController(
-        CriarPropostaUseCase criarUseCase, 
-        ObterPropostaUseCase obterUseCase)
+        CriarPropostaUseCase criarUseCase,
+        ObterPropostaUseCase obterUseCase,
+        AtualizarStatusPropostaUseCase atualizarStatusUseCase)
     {
         _criarUseCase = criarUseCase;
         _obterUseCase = obterUseCase;
+        _atualizarStatusUseCase = atualizarStatusUseCase;
     }
 
     [HttpPost]
@@ -32,7 +35,6 @@ public class PropostasController : ControllerBase
             return BadRequest(new { erro = ex.Message });
         }
     }
-
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> ObterPorId(Guid id)
     {
@@ -42,5 +44,19 @@ public class PropostasController : ControllerBase
             return NotFound(new { message = "Proposta não encontrada." });
 
         return Ok(proposta);
+    }
+
+    [HttpPut("{id:guid}/status")]
+    public async Task<IActionResult> AtualizarStatus(Guid id, [FromBody] AtualizarStatusInput input)
+    {
+        try
+        {
+            await _atualizarStatusUseCase.ExecuteAsync(id, input);
+            return NoContent(); //Retorna 204 sem conteúdo
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { erro = ex.Message });
+        }
     }
 }
