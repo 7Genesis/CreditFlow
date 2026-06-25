@@ -2,6 +2,9 @@
   <Folder Name="/Creditflow.API/">
     <Project Path="Creditflow.API/CreditFlow.API.csproj" />
   </Folder>
+  <Folder Name="/creditFlow.Domain.Tests/">
+    <Project Path="creditFlow.Domain.Tests/CreditFlow.Domain.Tests.csproj" />
+  </Folder>
   <Project Path="CreditFlow.Application/CreditFlow.Application.csproj" />
   <Project Path="CreditFlow.Domain/CreditFlow.Domain.csproj" />
   <Project Path="CreditFlow.Infrastructure/CreditFlow.Infrastructure.csproj" />
