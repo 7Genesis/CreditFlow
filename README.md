@@ -1,10 +1,10 @@
-# CreditFlow 🚀
+# CreditFlow 
 
 O **CreditFlow** é um microsserviço de motor e gerenciamento de propostas de crédito desenvolvido em **.NET 10** e **C#**. O projeto adota os princípios da **Clean Architecture** (Arquitetura Limpa) e do **Domain-Driven Design (DDD)** para garantir o isolamento absoluto da lógica de negócio, alta testabilidade, manutenibilidade e performance sob carga.
 
 ---
 
-## 🛠️ Tecnologias & Ecossistema
+##  Tecnologias & Ecossistema
 
 * **Runtime:** .NET 10
 * **Linguagem:** C# 13
@@ -16,7 +16,7 @@ O **CreditFlow** é um microsserviço de motor e gerenciamento de propostas de c
 
 ---
 
-## 🏗️ Arquitetura do Sistema
+##  Arquitetura do Sistema
 
 A solução está dividida em camadas estritamente desacopladas, onde a dependência aponta sempre para o centro (o Domínio):
 
@@ -28,7 +28,7 @@ A solução está dividida em camadas estritamente desacopladas, onde a dependê
 
 ---
 
-## 🔥 Funcionalidades Principais (CRUD)
+##  Funcionalidades Principais (CRUD)
 
 * **Criar Proposta (`POST /api/propostas`):** Registra uma nova solicitação de crédito no banco de dados.
 * **Obter Proposta (`GET /api/propostas/{id}`):** Recupera os detalhes estruturados de uma proposta específica via UUID.
@@ -37,7 +37,7 @@ A solução está dividida em camadas estritamente desacopladas, onde a dependê
 
 ---
 
-## 🛡️ Engenharia de Qualidade & Performance
+##  Engenharia de Qualidade & Performance
 
 ### 1. Fail-Fast & Blindagem de Entrada (FluentValidation)
 A validação de entrada é tratada de forma desacoplada antes de poluir a entidade de domínio ou o banco de dados. O `CriarPropostaInputValidator` assegura que:
@@ -53,7 +53,7 @@ As transições de estado críticos da proposta de crédito e suas validações 
 
 ---
 
-## 🚀 Como Executar o Projeto
+##  Como Executar o Projeto
 
 ### Pré-requisitos
 * SDK do .NET 10 instalado.
