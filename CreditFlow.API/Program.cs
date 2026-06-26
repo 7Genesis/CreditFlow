@@ -3,6 +3,9 @@ using CreditFlow.Domain.Repositories;
 using CreditFlow.Infrastructure.Data;
 using CreditFlow.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
+using FluentValidation;
+using CreditFlow.Application.Validators;
+using CreditFlow.Application.DTOs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +19,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 //3. Registrar o repositório(Injeção de dependência)
 // Sempre que aplicação pedir IPropostaCreditoRepository, o .NET injeta PropostaCreditoRepository
 builder.Services.AddScoped<IPropostaCreditoRepository, PropostaCreditoRepository>();
+
+//4. Registrar o validator para CriarPropostaInput
+builder.Services.AddScoped<IValidator<CriarPropostaInput>, CriarPropostaInputValidator>();
 
 //4.Registrar os Casos de Uso da camada de aplicação
 builder.Services.AddScoped<AtualizarStatusPropostaUseCase>();
