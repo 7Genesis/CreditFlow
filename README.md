@@ -1,89 +1,54 @@
-# CreditFlow 
+# CreditFlow
 
-O **CreditFlow** é um microsserviço de motor e gerenciamento de propostas de crédito desenvolvido em **.NET 10** e **C#**. O projeto adota os princípios da **Clean Architecture** (Arquitetura Limpa) e do **Domain-Driven Design (DDD)** para garantir o isolamento absoluto da lógica de negócio, alta testabilidade, manutenibilidade e performance sob carga.
+O **CreditFlow** é um motor de decisão e gerenciamento de propostas de crédito desenvolvido para garantir alta disponibilidade, consistência de regras financeiras e processamento em tempo real. 
 
----
+## O Problema: Gargalos na Esteira de Crédito
+Instituições financeiras e fintechs frequentemente perdem conversão e assumem riscos operacionais devido a esteiras de crédito lentas, acopladas e suscetíveis a dados inconsistentes. A falta de validação na entrada (sujando a base de dados) e a lentidão na listagem de propostas geram gargalos severos no back-office, atrasando a análise de crédito e frustrando o cliente final.
 
-##  Tecnologias & Ecossistema
+## A Solução CreditFlow
+Desenvolvemos este microsserviço para ser o coração de uma esteira de crédito escalável. O foco do sistema é processar, validar e transicionar os status das propostas financeiras com latência mínima e segurança absoluta.
 
-* **Runtime:** .NET 10
-* **Linguagem:** C# 13
-* **Framework Web:** ASP.NET Core Web API
-* **Persistência & ORM:** Entity Framework Core
-* **Banco de Dados:** PostgreSQL
-* **Validação:** FluentValidation
-* **Testes Unitários:** xUnit
+O que entregamos em valor de negócio:
+- **Blindagem de Entrada (Fail-Fast):** Nenhuma proposta avança na esteira com dados inválidos. Regras estritas (validação de CPF, limite de parcelas e valores) protegem a integridade do banco de dados e eliminam o retrabalho de analistas.
+- **Eficiência de Back-Office:** Otimizamos o consumo de memória na listagem geral de propostas. Painéis administrativos podem carregar milhares de registros com latências na casa dos 12ms, garantindo fluidez para a equipe de operações.
+- **Previsibilidade Financeira:** As regras de transição de status (Aprovação, Rejeição, Análise) são isoladas e protegidas por testes automatizados, garantindo *compliance* e eliminando o risco de regressões em regras críticas de negócio.
 
----
+## Arquitetura Estratégica (Clean Architecture & DDD)
+Para suportar o crescimento e futuras integrações, a solução foi dividida em camadas com isolamento absoluto do domínio:
 
-##  Arquitetura do Sistema
+* **CreditFlow.Domain:** O núcleo da aplicação. Contém as regras de negócio puras e entidades (ex: `PropostaCredito`). Zero acoplamento com frameworks externos.
+* **CreditFlow.Application:** Orquestração de fluxos (Casos de Uso) e contratos de entrada/saída (DTOs).
+* **CreditFlow.Infrastructure:** Acesso a dados otimizado. Na leitura em massa, desativamos o rastreamento de estado (`AsNoTracking`) do Entity Framework para maximizar a performance e reduzir consumo de CPU.
+* **CreditFlow.API:** Porta de entrada limpa, focada apenas em roteamento e injeção de dependência.
+* **CreditFlow.Domain.Tests:** Suíte de testes unitários (xUnit) que blinda as regras de crédito.
 
-A solução está dividida em camadas estritamente desacopladas, onde a dependência aponta sempre para o centro (o Domínio):
+## Tecnologias
+* **.NET 10** e **C# 13**
+* **ASP.NET Core Web API**
+* **PostgreSQL** (Persistência)
+* **Entity Framework Core** (ORM)
+* **FluentValidation** (Validação Fail-Fast)
+* **xUnit** (Engenharia de Qualidade)
 
-1.  **CreditFlow.Domain:** O coração da aplicação. Contém as entidades de negócio (`PropostaCredito`), enums (`StatusProposta`) e as interfaces dos repositórios (`IPropostaCreditoRepository`). Zero dependências externas ou de frameworks.
-2.  **CreditFlow.Application:** Contém as regras de aplicação e orquestração de fluxos através de **Casos de Uso** (`UseCases`), como `CriarPropostaUseCase` e `ListarPropostasUseCase`, além das definições de DTOs de entrada e saída.
-3.  **CreditFlow.Infrastructure:** Implementação do acesso a dados, configurações do DbContext do Entity Framework Core e repositórios concretos que realizam a comunicação com o PostgreSQL.
-4.  **CreditFlow.API:** A porta de entrada da aplicação. Controladores HTTP limpos que delegam a execução diretamente para a camada de Aplicação através de Injeção de Dependência nativa.
-5.  **CreditFlow.Domain.Tests:** Camada de testes unitários que blinda as regras de negócio contra regressões de código.
+## Como Executar o Projeto
 
----
-
-##  Funcionalidades Principais (CRUD)
-
-* **Criar Proposta (`POST /api/propostas`):** Registra uma nova solicitação de crédito no banco de dados.
-* **Obter Proposta (`GET /api/propostas/{id}`):** Recupera os detalhes estruturados de uma proposta específica via UUID.
-* **Atualizar Status (`PUT /api/propostas/{id}/status`):** Altera o estado da proposta (Aprovada, Rejeitada, etc.) com base nas regras rígidas do domínio.
-* **Listagem Geral Otimizada (`GET /api/propostas`):** Retorna uma matriz com todas as propostas, ordenada de forma decrescente pela data de criação.
-
----
-
-##  Engenharia de Qualidade & Performance
-
-### 1. Fail-Fast & Blindagem de Entrada (FluentValidation)
-A validação de entrada é tratada de forma desacoplada antes de poluir a entidade de domínio ou o banco de dados. O `CriarPropostaInputValidator` assegura que:
-* O CPF do cliente seja obrigatório e possua rigorosamente 11 dígitos.
-* O valor solicitado seja estritamente maior que zero.
-* A quantidade de parcelas esteja contida no intervalo seguro de 1 a 60.
-
-### 2. Performance de Leitura (`AsNoTracking`)
-Na listagem geral de propostas, a infraestrutura desativa o rastreamento de estado em memória do Entity Framework Core utilizando o método `.AsNoTracking()`. Como os dados são destinados exclusivamente à exibição (dashboard/painel administrativo), o consumo de CPU e memória do servidor é drasticamente reduzido, garantindo latências de resposta na casa dos **12ms**.
-
-### 3. Cobertura de Testes Unitários
-As transições de estado críticos da proposta de crédito e suas validações internas são protegidas por suites de testes em **xUnit**, garantindo previsibilidade e estabilidade durante o ciclo de evolução do software.
-
----
-
-##  Como Executar o Projeto
-
-### Pré-requisitos
+**Pré-requisitos:**
 * SDK do .NET 10 instalado.
-* Instância do PostgreSQL ativa e string de conexão configurada em `appsettings.json`.
+* Instância do PostgreSQL ativa.
 
-### Passo a Passo
+**Passo a Passo:**
+1. Clone o repositório:
+   `git clone https://github.com/7Genesis/CreditFlow.git`
+2. Acesse o diretório:
+   `cd CreditFlow`
+3. Configure a *string de conexão* com o banco de dados no arquivo `appsettings.json`.
+4. Restaure as dependências e compile:
+   `dotnet restore`
+   `dotnet build`
+5. Execute a API:
+   `dotnet run --project CreditFlow.API`
+   *(A API estará disponível no endereço configurado, ex: `http://localhost:5059`)*
 
-1.  **Clonar o repositório:**
-    ```bash
-    git clone [https://github.com/7Genesis/CreditFlow.git](https://github.com/7Genesis/CreditFlow.git)
-    cd CreditFlow
-    ```
-
-2.  **Restaurar as dependências:**
-    ```bash
-    dotnet restore
-    ```
-
-3.  **Compilar a solução:**
-    ```bash
-    dotnet build
-    ```
-
-4.  **Executar a API:**
-    ```bash
-    dotnet run --project CreditFlow.API
-    ```
-    A API estará disponível por padrão no endereço configurado (ex: `http://localhost:5059`).
-
-5.  **Executar a Suite de Testes:**
-    ```bash
-    dotnet test
-    ```
+## Engenharia de Qualidade
+Para validar a resiliência das regras de domínio e a eficácia das validações de estado, execute a suíte de testes:
+`dotnet test`
