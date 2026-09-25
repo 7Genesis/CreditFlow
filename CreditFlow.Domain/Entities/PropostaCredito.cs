@@ -11,11 +11,8 @@ public class PropostaCredito
     public StatusProposta Status { get; private set; }
     public DateTime DataCriacao { get; private set; }
 
-    // Construtor que você já criou anteriormente
     public PropostaCredito(string cpfCliente, decimal valorSolicitado, int quantidadeParcelas)
     {
-        // ... (mantenha suas validações de CPF e valor aqui) ...
-        
         Id = Guid.NewGuid();
         CpfCliente = cpfCliente;
         ValorSolicitado = valorSolicitado;
@@ -24,7 +21,6 @@ public class PropostaCredito
         DataCriacao = DateTime.UtcNow;
     }
 
-    
     public void Aprovar()
     {
         if (Status != StatusProposta.EmAnalise)

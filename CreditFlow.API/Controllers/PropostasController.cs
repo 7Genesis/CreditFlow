@@ -1,5 +1,6 @@
 using CreditFlow.Application.DTOs;
 using CreditFlow.Application.UseCases;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CreditFlow.API.Controllers;
@@ -39,6 +40,10 @@ public class PropostasController : ControllerBase
         {
             var idGerado = await _criarUseCase.ExecuteAsync(input);
             return StatusCode(201, new { message = "Proposta criada com sucesso", id = idGerado });
+        }
+        catch (ValidationException ex)
+        {
+            return BadRequest(new { erro = ex.Message });
         }
         catch (ArgumentException ex)
         {

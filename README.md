@@ -1,54 +1,77 @@
 # CreditFlow
 
-O **CreditFlow** é um motor de decisão e gerenciamento de propostas de crédito desenvolvido para garantir alta disponibilidade, consistência de regras financeiras e processamento em tempo real. 
+API de propostas de crédito em **.NET 10**, organizada em Clean Architecture. É um projeto de estudo: o foco está em manter a regra de negócio no domínio, validar a entrada e cobrir a regra de status com testes.
 
-## O Problema: Gargalos na Esteira de Crédito
-Instituições financeiras e fintechs frequentemente perdem conversão e assumem riscos operacionais devido a esteiras de crédito lentas, acopladas e suscetíveis a dados inconsistentes. A falta de validação na entrada (sujando a base de dados) e a lentidão na listagem de propostas geram gargalos severos no back-office, atrasando a análise de crédito e frustrando o cliente final.
+## O que faz
 
-## A Solução CreditFlow
-Desenvolvemos este microsserviço para ser o coração de uma esteira de crédito escalável. O foco do sistema é processar, validar e transicionar os status das propostas financeiras com latência mínima e segurança absoluta.
+- Cria uma proposta de crédito (CPF, valor solicitado e quantidade de parcelas). Toda proposta nasce **em análise**.
+- Lista as propostas, da mais nova para a mais antiga, e consulta uma proposta pelo id.
+- Aprova ou recusa uma proposta. A regra fica na entidade: só uma proposta em análise pode mudar de status.
 
-O que entregamos em valor de negócio:
-- **Blindagem de Entrada (Fail-Fast):** Nenhuma proposta avança na esteira com dados inválidos. Regras estritas (validação de CPF, limite de parcelas e valores) protegem a integridade do banco de dados e eliminam o retrabalho de analistas.
-- **Eficiência de Back-Office:** Otimizamos o consumo de memória na listagem geral de propostas. Painéis administrativos podem carregar milhares de registros com latências na casa dos 12ms, garantindo fluidez para a equipe de operações.
-- **Previsibilidade Financeira:** As regras de transição de status (Aprovação, Rejeição, Análise) são isoladas e protegidas por testes automatizados, garantindo *compliance* e eliminando o risco de regressões em regras críticas de negócio.
+## Endpoints
 
-## Arquitetura Estratégica (Clean Architecture & DDD)
-Para suportar o crescimento e futuras integrações, a solução foi dividida em camadas com isolamento absoluto do domínio:
+| Método | Rota | Corpo | Resposta |
+|---|---|---|---|
+| `POST` | `/api/propostas` | `{ "cpfCliente": "12345678901", "valorSolicitado": 15000, "quantidadeParcelas": 24 }` | `201` com o id da proposta; `400` se a validação falhar |
+| `GET` | `/api/propostas` | | `200` com a lista |
+| `GET` | `/api/propostas/{id}` | | `200`, ou `404` se não existir |
+| `PUT` | `/api/propostas/{id}/status` | `{ "aprovado": true }` | `204`; `400` se a transição não for permitida |
 
-* **CreditFlow.Domain:** O núcleo da aplicação. Contém as regras de negócio puras e entidades (ex: `PropostaCredito`). Zero acoplamento com frameworks externos.
-* **CreditFlow.Application:** Orquestração de fluxos (Casos de Uso) e contratos de entrada/saída (DTOs).
-* **CreditFlow.Infrastructure:** Acesso a dados otimizado. Na leitura em massa, desativamos o rastreamento de estado (`AsNoTracking`) do Entity Framework para maximizar a performance e reduzir consumo de CPU.
-* **CreditFlow.API:** Porta de entrada limpa, focada apenas em roteamento e injeção de dependência.
-* **CreditFlow.Domain.Tests:** Suíte de testes unitários (xUnit) que blinda as regras de crédito.
+Validação na entrada (FluentValidation): CPF com 11 dígitos, valor maior que zero e de 1 a 60 parcelas.
 
-## Tecnologias
-* **.NET 10** e **C# 13**
-* **ASP.NET Core Web API**
-* **PostgreSQL** (Persistência)
-* **Entity Framework Core** (ORM)
-* **FluentValidation** (Validação Fail-Fast)
-* **xUnit** (Engenharia de Qualidade)
+Exemplos prontos para rodar estão em [`CreditFlow.API/CreditFlow.API.http`](CreditFlow.API/CreditFlow.API.http).
 
-## Como Executar o Projeto
+## Arquitetura
 
-**Pré-requisitos:**
-* SDK do .NET 10 instalado.
-* Instância do PostgreSQL ativa.
+```
+CreditFlow.Domain          entidade PropostaCredito, StatusProposta e a regra de transição de status
+CreditFlow.Application     casos de uso, DTOs e validadores (FluentValidation)
+CreditFlow.Infrastructure  Entity Framework Core, PostgreSQL e repositório
+CreditFlow.API             controllers e injeção de dependência
+CreditFlow.Domain.Tests    testes de unidade (xUnit) da regra de status
+```
 
-**Passo a Passo:**
-1. Clone o repositório:
-   `git clone https://github.com/7Genesis/CreditFlow.git`
-2. Acesse o diretório:
-   `cd CreditFlow`
-3. Configure a *string de conexão* com o banco de dados no arquivo `appsettings.json`.
-4. Restaure as dependências e compile:
-   `dotnet restore`
-   `dotnet build`
-5. Execute a API:
-   `dotnet run --project CreditFlow.API`
-   *(A API estará disponível no endereço configurado, ex: `http://localhost:5059`)*
+Duas decisões que valem citar:
 
-## Engenharia de Qualidade
-Para validar a resiliência das regras de domínio e a eficácia das validações de estado, execute a suíte de testes:
-`dotnet test`
+- O status só muda por `Aprovar()` e `Recusar()`, na própria entidade (`Status` tem `private set`).
+- A listagem usa `AsNoTracking()`, porque os registros só são lidos.
+
+## Como rodar
+
+Pré-requisitos: SDK do .NET 10 e um PostgreSQL acessível.
+
+1. Configure a string de conexão em `CreditFlow.API/appsettings.Development.json` (ou com `dotnet user-secrets`):
+
+   ```json
+   {
+     "ConnectionStrings": {
+       "DefaultConnection": "Host=localhost;Port=5432;Database=creditflow;Username=postgres;Password=sua_senha"
+     }
+   }
+   ```
+
+2. Aplique as migrations (precisa da ferramenta `dotnet-ef`):
+
+   ```bash
+   dotnet ef database update --project CreditFlow.Infrastructure --startup-project CreditFlow.API
+   ```
+
+3. Suba a API:
+
+   ```bash
+   dotnet run --project CreditFlow.API
+   ```
+
+   Ela fica em `http://localhost:5059`.
+
+Testes:
+
+```bash
+dotnet test
+```
+
+## O que ainda falta
+
+- Testes de integração dos endpoints (hoje só o domínio tem testes).
+- Validar o CPF pelos dígitos verificadores (hoje só o tamanho).
+- Autenticação e paginação na listagem.
