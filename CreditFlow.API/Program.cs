@@ -35,6 +35,13 @@ builder.Services.AddControllers();
 
 var app = builder.Build();
 
+// Opt-in: aplica as migrations ao subir (usado pelo docker-compose). Fica desligado por padrão.
+if (app.Configuration.GetValue<bool>("Database:MigrateOnStartup"))
+{
+    using var scope = app.Services.CreateScope();
+    scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.Migrate();
+}
+
 //6. Mapeia os endpoints dos Controllers para as rotas da API
 app.MapControllers();
 
@@ -42,3 +49,6 @@ app.MapControllers();
 app.MapGet("/", () => "API de Propostas de Crédito está funcionando!");
 
 app.Run();
+
+// Necessário para o WebApplicationFactory nos testes de API
+public partial class Program { }
