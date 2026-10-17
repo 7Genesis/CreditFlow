@@ -5,7 +5,7 @@ POST {{host}}/api/propostas
 Content-Type: application/json
 
 {
-  "cpfCliente": "12345678901",
+  "cpfCliente": "52998224725",
   "valorSolicitado": 15000,
   "quantidadeParcelas": 24
 }
