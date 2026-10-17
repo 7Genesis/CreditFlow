@@ -28,7 +28,9 @@ CreditFlow.Domain          entidade PropostaCredito, StatusProposta e a regra de
 CreditFlow.Application     casos de uso, DTOs e validadores (FluentValidation)
 CreditFlow.Infrastructure  Entity Framework Core, PostgreSQL e repositório
 CreditFlow.API             controllers e injeção de dependência
-CreditFlow.Domain.Tests    testes de unidade (xUnit) da regra de status
+CreditFlow.Domain.Tests       testes de unidade (xUnit) da regra de status
+CreditFlow.Application.Tests  testes dos validadores (FluentValidation) e dos casos de uso, com repositório em memória
+CreditFlow.API.Tests          testes de API: sobe a aplicação e chama os endpoints, com EF Core InMemory no lugar do PostgreSQL
 ```
 
 Duas decisões que valem citar:
@@ -37,6 +39,22 @@ Duas decisões que valem citar:
 - A listagem usa `AsNoTracking()`, porque os registros só são lidos.
 
 ## Como rodar
+
+### Com Docker (API + PostgreSQL)
+
+Pré-requisito: Docker com Compose.
+
+```bash
+docker compose up --build
+```
+
+A API fica em `http://localhost:8080` e o PostgreSQL em `localhost:5432`. O compose liga a opção `Database__MigrateOnStartup`, então as migrations são aplicadas quando a API sobe. Se a porta 8080 estiver ocupada, use outra: `API_PORT=18080 docker compose up --build`.
+
+Para parar e apagar o banco: `docker compose down -v`.
+
+O `Dockerfile` é multi-stage: publica com o SDK do .NET 10 e roda numa imagem `aspnet:10.0`, sem usuário root. As credenciais do compose (`postgres`/`postgres`) servem só para desenvolvimento local.
+
+### Sem Docker
 
 Pré-requisitos: SDK do .NET 10 e um PostgreSQL acessível.
 
@@ -64,14 +82,24 @@ Pré-requisitos: SDK do .NET 10 e um PostgreSQL acessível.
 
    Ela fica em `http://localhost:5059`.
 
-Testes:
+## Testes
 
 ```bash
 dotnet test
 ```
 
+Rodam 31 testes, sem precisar de banco nem de Docker:
+
+- **Domínio** (3): transições de status da proposta.
+- **Aplicação** (20): regras do validador (CPF, valor, parcelas e os limites 1 e 60) e os casos de uso criar, obter, listar e atualizar status.
+- **API** (8): o fluxo completo pelos endpoints (criar, consultar, listar, aprovar, `400` e `404`). Usam o provider InMemory do EF Core, que não reproduz tudo do PostgreSQL; a conferência contra o PostgreSQL real é pelo `docker compose`.
+
+## CI
+
+O workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml) roda em push na `main` e em pull request: restaura, compila e executa os testes, e também faz o build da imagem Docker.
+
 ## O que ainda falta
 
-- Testes de integração dos endpoints (hoje só o domínio tem testes).
+- Testes de integração contra um PostgreSQL de verdade (os testes de API usam banco em memória).
 - Validar o CPF pelos dígitos verificadores (hoje só o tamanho).
 - Autenticação e paginação na listagem.
