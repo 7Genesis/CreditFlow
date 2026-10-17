@@ -1,5 +1,8 @@
 # CreditFlow
 
+[![CI](https://github.com/7Genesis/CreditFlow/actions/workflows/ci.yml/badge.svg)](https://github.com/7Genesis/CreditFlow/actions/workflows/ci.yml)
+[![Licença: MIT](https://img.shields.io/badge/licença-MIT-blue.svg)](LICENSE)
+
 API de propostas de crédito em **.NET 10**, organizada em Clean Architecture. É um projeto de estudo: o foco está em manter a regra de negócio no domínio, validar a entrada e cobrir a regra de status com testes.
 
 ## O que faz
@@ -12,12 +15,12 @@ API de propostas de crédito em **.NET 10**, organizada em Clean Architecture. �
 
 | Método | Rota | Corpo | Resposta |
 |---|---|---|---|
-| `POST` | `/api/propostas` | `{ "cpfCliente": "12345678901", "valorSolicitado": 15000, "quantidadeParcelas": 24 }` | `201` com o id da proposta; `400` se a validação falhar |
+| `POST` | `/api/propostas` | `{ "cpfCliente": "52998224725", "valorSolicitado": 15000, "quantidadeParcelas": 24 }` | `201` com o id da proposta; `400` se a validação falhar |
 | `GET` | `/api/propostas` | | `200` com a lista |
 | `GET` | `/api/propostas/{id}` | | `200`, ou `404` se não existir |
 | `PUT` | `/api/propostas/{id}/status` | `{ "aprovado": true }` | `204`; `400` se a transição não for permitida |
 
-Validação na entrada (FluentValidation): CPF com 11 dígitos, valor maior que zero e de 1 a 60 parcelas.
+Validação na entrada (FluentValidation): CPF com 11 dígitos e dígitos verificadores corretos (sequências como `11111111111` são recusadas), valor maior que zero e de 1 a 60 parcelas.
 
 Exemplos prontos para rodar estão em [`CreditFlow.API/CreditFlow.API.http`](CreditFlow.API/CreditFlow.API.http).
 
@@ -88,10 +91,10 @@ Pré-requisitos: SDK do .NET 10 e um PostgreSQL acessível.
 dotnet test
 ```
 
-Rodam 31 testes, sem precisar de banco nem de Docker:
+Rodam 37 testes, sem precisar de banco nem de Docker:
 
 - **Domínio** (3): transições de status da proposta.
-- **Aplicação** (20): regras do validador (CPF, valor, parcelas e os limites 1 e 60) e os casos de uso criar, obter, listar e atualizar status.
+- **Aplicação** (26): regras do validador (CPF com dígitos verificadores, valor, parcelas e os limites 1 e 60) e os casos de uso criar, obter, listar e atualizar status.
 - **API** (8): o fluxo completo pelos endpoints (criar, consultar, listar, aprovar, `400` e `404`). Usam o provider InMemory do EF Core, que não reproduz tudo do PostgreSQL; a conferência contra o PostgreSQL real é pelo `docker compose`.
 
 ## CI
@@ -101,5 +104,4 @@ O workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml) roda em push n
 ## O que ainda falta
 
 - Testes de integração contra um PostgreSQL de verdade (os testes de API usam banco em memória).
-- Validar o CPF pelos dígitos verificadores (hoje só o tamanho).
 - Autenticação e paginação na listagem.
