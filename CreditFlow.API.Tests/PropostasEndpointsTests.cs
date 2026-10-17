@@ -13,7 +13,7 @@ public class PropostasEndpointsTests : IClassFixture<CreditFlowApiFactory>
         _client = factory.CreateClient();
     }
 
-    private async Task<Guid> CriarPropostaAsync(string cpf = "12345678901", decimal valor = 15000m, int parcelas = 24)
+    private async Task<Guid> CriarPropostaAsync(string cpf = "52998224725", decimal valor = 15000m, int parcelas = 24)
     {
         var resposta = await _client.PostAsJsonAsync("/api/propostas",
             new { cpfCliente = cpf, valorSolicitado = valor, quantidadeParcelas = parcelas });
@@ -41,7 +41,7 @@ public class PropostasEndpointsTests : IClassFixture<CreditFlowApiFactory>
         Assert.Equal(HttpStatusCode.OK, resposta.StatusCode);
         var proposta = await resposta.Content.ReadFromJsonAsync<JsonElement>();
         Assert.Equal("EmAnalise", proposta.GetProperty("status").GetString());
-        Assert.Equal("12345678901", proposta.GetProperty("cpfCliente").GetString());
+        Assert.Equal("52998224725", proposta.GetProperty("cpfCliente").GetString());
     }
 
     [Fact]
@@ -64,7 +64,7 @@ public class PropostasEndpointsTests : IClassFixture<CreditFlowApiFactory>
     [Fact]
     public async Task Get_Lista_IncluiPropostaCriada()
     {
-        var id = await CriarPropostaAsync(cpf: "10987654321");
+        var id = await CriarPropostaAsync(cpf: "11144477735");
 
         var resposta = await _client.GetAsync("/api/propostas");
 

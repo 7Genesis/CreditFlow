@@ -16,7 +16,7 @@ public class UseCasesTests
     {
         var useCase = new CriarPropostaUseCase(_repository, new CriarPropostaInputValidator());
 
-        var id = await useCase.ExecuteAsync(new CriarPropostaInput("12345678901", 15000m, 24));
+        var id = await useCase.ExecuteAsync(new CriarPropostaInput("52998224725", 15000m, 24));
 
         var salva = Assert.Single(_repository.Propostas);
         Assert.Equal(id, salva.Id);
